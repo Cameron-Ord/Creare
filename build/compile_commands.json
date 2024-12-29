@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/home/cameron/P/creare/build",
-  "command": "/usr/bin/cc   -std=gnu11 -Wall -Wextra -pedantic -o CMakeFiles/Creare.dir/src/main.c.o -c /home/cameron/P/creare/src/main.c",
-  "file": "/home/cameron/P/creare/src/main.c",
-  "output": "CMakeFiles/Creare.dir/src/main.c.o"
-}
-]

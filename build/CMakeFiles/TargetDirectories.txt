@@ -1,3 +1,0 @@
-/home/cameron/P/creare/build/CMakeFiles/Creare.dir
-/home/cameron/P/creare/build/CMakeFiles/edit_cache.dir
-/home/cameron/P/creare/build/CMakeFiles/rebuild_cache.dir

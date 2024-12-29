@@ -1,1 +1,0 @@
-/usr/bin/cc CMakeFiles/Creare.dir/src/main.c.o -o /home/cameron/P/creare/bin/Creare  -lm /usr/lib64/libSDL2.so /usr/lib64/libSDL2_ttf.so /usr/lib64/libSDL2_image.so
