@@ -63,20 +63,41 @@ static SDL_Renderer *create_renderer(SDL_Window *w) {
 // inside the crx_spec struct. So multiple sizes values will be stored inside
 // the base struct, then I will have to malloc them before use so I will be
 // freading a bunch of things seperately. But lets try to keep it simple.
+//
+
+const int HEADER_SIZE = 3;
+
 static crx_spec read_file(const char *fn) {
   fprintf(stdout, "Reading : %s\n", fn);
   crx_spec spec = {0};
+  int read;
 
   FILE *fptr = fopen(fn, "rb");
   if (!fptr) {
-    fprintf(stderr, "Failed to open file in read mode! Error:\n%s\n",
+    fprintf(stderr, "Failed to open file in read mode! Error: %s\n",
             strerror(errno));
     return spec;
   }
 
-  const size_t read = fread(&spec, sizeof(crx_spec), 1, fptr);
-  if (read != 1) {
-    fprintf(stderr, "Could not read file! Error:\n%s\n", strerror(errno));
+  char header[HEADER_SIZE + 1];
+  read = fread(header, sizeof(char), 3, fptr);
+  if (read != 3 || ferror(fptr)) {
+    fprintf(stderr, "Could not read file! Error: %s\n", strerror(errno));
+    fclose(fptr);
+    return spec;
+  }
+  header[HEADER_SIZE] = '\0';
+  fprintf(stdout, "HEADER : %s\n", header);
+
+  if (strcmp(header, "CRX") != 0) {
+    fprintf(stderr, "Incorrect file header!\n");
+    fclose(fptr);
+    return spec;
+  }
+
+  read = fread(&spec, sizeof(crx_spec), 1, fptr);
+  if (read != 1 || ferror(fptr)) {
+    fprintf(stderr, "Could not read file! Error: %s\n", strerror(errno));
     fclose(fptr);
     return spec;
   }
@@ -90,17 +111,26 @@ static crx_spec read_file(const char *fn) {
 static crx_spec create_file(const char *fn) {
   fprintf(stdout, "Creating : %s\n", fn);
   crx_spec spec = {0};
+  int written;
 
   FILE *fptr = fopen(fn, "wb");
   if (!fptr) {
-    fprintf(stderr, "Failed to open file in write mode! Error:\n%s\n",
+    fprintf(stderr, "Failed to open file in write mode! Error: %s\n",
             strerror(errno));
     return spec;
   }
 
-  const size_t wrtn = fwrite(&spec, sizeof(crx_spec), 1, fptr);
-  if (wrtn != 1) {
-    fprintf(stderr, "Failed to write to file!\n");
+  const char header[] = {'C', 'R', 'X'};
+  written = fwrite(header, sizeof(char), 3, fptr);
+  if (written != 3 || ferror(fptr)) {
+    fprintf(stderr, "Failed to write to file! Error: %s\n", strerror(errno));
+    fclose(fptr);
+    return spec;
+  }
+
+  written = fwrite(&spec, sizeof(crx_spec), 1, fptr);
+  if (written != 1 || ferror(fptr)) {
+    fprintf(stderr, "Failed to write to file! Error: %s\n", strerror(errno));
     fclose(fptr);
     return spec;
   }
@@ -131,11 +161,12 @@ int main(int argc, char **argv) {
       case N: {
         if (argc == 3) {
           if (!check_ftype(get_extension_idx(argv[2]), argv[2])) {
-            printf("Invalid binary file type!\n");
+            fprintf(stderr, "Must use the .crx file extension convention!\n");
             return 1;
           } else {
             spec = create_file(argv[2]);
             if (!spec.valid) {
+              fprintf(stderr, "File writing failed! -> EXIT\n");
               return 1;
             }
           }
@@ -146,17 +177,18 @@ int main(int argc, char **argv) {
       case E: {
         if (argc == 3) {
           if (!check_ftype(get_extension_idx(argv[2]), argv[2])) {
-            printf("Invalid binary file type!\n");
+            fprintf(
+                stderr,
+                "WARN - Binary does not have the expected file extension!\n");
+          }
+          spec = read_file(argv[2]);
+          if (!spec.valid) {
+            fprintf(stderr, "File read failed! -> EXIT\n");
             return 1;
-          } else {
-            spec = read_file(argv[2]);
-            if (!spec.valid) {
-              return 1;
-            }
           }
 
         } else {
-          fprintf(stdout, "Invalid arguments\n");
+          fprintf(stderr, "Invalid arguments\n");
           return 1;
         }
       } break;
