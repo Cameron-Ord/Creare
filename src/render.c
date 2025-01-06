@@ -13,19 +13,16 @@ void render_present(SDL_Renderer *r) { SDL_RenderPresent(r); }
 void render_grid(SDL_Renderer *r, const int tile_size, Coordinates *c) {
   SDL_Rect viewport = create_viewport(c->width, c->height);
   SDL_RenderSetViewport(r, &viewport);
+  const int cell = 2;
 
-  const int cell = 4;
-  // Minus half the cell to center it on its position
-  const int increment = tile_size - (cell / 2);
-
-  for (int i = 0; i < c->height; i += increment) {
-    SDL_Rect row = {.x = 0, .y = i, .w = c->width, cell};
+  for (int i = 0; i <= c->height; i += c->grid.tile_height) {
+    SDL_Rect row = {.x = 0, .y = i - 1, .w = c->width, cell};
     SDL_SetRenderDrawColor(r, 255, 255, 255, 255);
     SDL_RenderFillRect(r, &row);
   }
 
-  for (int i = 0; i < c->width; i += increment) {
-    SDL_Rect column = {.x = i, .y = 0, .w = cell, c->height};
+  for (int i = 0; i <= c->width; i += c->grid.tile_width) {
+    SDL_Rect column = {.x = i - 1, .y = 0, .w = cell, c->height};
     SDL_SetRenderDrawColor(r, 255, 255, 255, 255);
     SDL_RenderFillRect(r, &column);
   }

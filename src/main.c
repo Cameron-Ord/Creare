@@ -18,18 +18,53 @@ typedef struct {
   int quit;
 } ProgramBools;
 
-const int tile_size = 32;
+// These will be configureable later, just using a default value for now
+#define MAP_HEIGHT 1200
+#define MAP_WIDTH 1800
 
-#define DFT_HEIGHT 600
-#define DFT_WIDTH 800
+/* These comments are just notes to myself. */
+
+// Tiles are represented by the grid. So by the values overhead the map will
+// contain 1200x1800 tiles.
+
+// Keeping things relative this way makes saving map data easy and I dont need
+// to use a coordinate system. As well as being able to scale sprites.
+
+// For the purposes of this program I will be defaulting to a 16:9 ratio
+// resolution of 1280x720. And a tile size of 32x18 as it fits perfectly in that
+// resolution.
+
+// I calculated this by first choosing a relative tile height with a 16:9 ratio.
+// 18 is a multiple of 9 (9 * 2). To calculate the width I do (16/9) *  18
+
+// height = 9 * 2
+// width = (16/9) * height
+// columns = 1280 / width
+// rows = 720 / height
+
+// if I wanted to use a 4:3 ratio it would be something like:
+
+// height = 3 * 4
+// width = (4/3) * height
+// columns = 1024 / width
+// rows = 768 / height
+
+// so 32(width)x18(height)
+
+// So with this I can implement varying aspect ratios but for now lets
+// default to 16:9
+int map[MAP_HEIGHT][MAP_WIDTH];
+
+#define DFT_HEIGHT 720
+#define DFT_WIDTH 1280
 
 static void show_help(void);
 static void update_coordinates(Coordinates *c, const int w, const int h);
 
 static SDL_Window *create_win(void) {
-  SDL_Window *w = SDL_CreateWindow(
-      "Creare", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DFT_WIDTH,
-      DFT_HEIGHT, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+  SDL_Window *w =
+      SDL_CreateWindow("Creare", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                       DFT_WIDTH, DFT_HEIGHT, SDL_WINDOW_HIDDEN);
 
   if (!w) {
     fprintf(stderr, "Failed to create window! Error:\n%s\n", SDL_GetError());
@@ -122,7 +157,8 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  WinInfo win = {.w = NULL, .r = NULL, .width = 800, .height = 600};
+  WinInfo win = {
+      .w = NULL, .r = NULL, .width = DFT_WIDTH, .height = DFT_HEIGHT};
   ProgramBools states = {.quit = 0};
 
   win.w = create_win();
@@ -154,12 +190,25 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  Coordinates coordinates = {
-      .width = win.width,
-      .height = win.height,
-      .x = {0},
-      .y = {0},
-  };
+  // 32x18 tiles.
+  //
+
+  const int tile_h = 36;
+  const int tile_w = 64;
+
+  const int rows = DFT_HEIGHT / tile_h;
+  const int columns = DFT_WIDTH / tile_w;
+
+  Grid grid = {.rows = rows,
+               .columns = columns,
+               .tile_width = tile_w,
+               .tile_height = tile_h};
+
+  Coordinates coordinates = {.width = win.width,
+                             .height = win.height,
+                             .x = {0},
+                             .y = {0},
+                             .grid = grid};
 
   const int tpf = (1000.0 / 60);
   uint64_t frame_start;
@@ -177,23 +226,6 @@ int main(int argc, char **argv) {
     while (SDL_PollEvent(&e)) {
       switch (e.type) {
 
-      case SDL_WINDOWEVENT: {
-        switch (e.window.event) {
-        default:
-          break;
-
-        case SDL_WINDOWEVENT_RESIZED: {
-          SDL_GetWindowSize(win.w, &win.width, &win.height);
-          update_coordinates(&coordinates, win.width, win.height);
-        } break;
-
-        case SDL_WINDOWEVENT_SIZE_CHANGED: {
-          SDL_GetWindowSize(win.w, &win.width, &win.height);
-          update_coordinates(&coordinates, win.width, win.height);
-        } break;
-        }
-      } break;
-
       case SDL_KEYDOWN: {
 
       } break;
@@ -204,7 +236,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    render_grid(win.r, tile_size, &coordinates);
+    render_grid(win.r, 32, &coordinates);
 
     frame_time = SDL_GetTicks64() - frame_start;
     if (tpf > frame_time) {

@@ -8,8 +8,14 @@ typedef struct {
 } Vec2i;
 
 typedef struct {
+  int rows, columns;
+  int tile_width, tile_height;
+} Grid;
+
+typedef struct {
   int width, height;
   Vec2i x, y;
+  Grid grid;
 } Coordinates;
 
 #endif // GRID_H
