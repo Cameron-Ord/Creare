@@ -51,6 +51,8 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  rend.coord = set_window_vga(&win);
+
   FontData font = create_font(font_file);
   if (!font.font) {
     fprintf(stderr, "Failed to open font! Error: %s\n", TTF_GetError());
@@ -61,9 +63,6 @@ int main(int argc, char **argv) {
   if (!logo.valid) {
     return 1;
   }
-
-  const int tile_h = 36;
-  const int tile_w = 64;
 
   int running = 1;
 
@@ -93,9 +92,9 @@ int main(int argc, char **argv) {
       }
     }
 
-    render_load_option(&win, &rend, &logo);
-    render_new_option(&win, &rend, &logo);
-    render_logo(&win, &rend, &logo);
+    render_logo(&rend, &logo);
+    render_new_option(&rend, &logo);
+    render_load_option(&rend, &logo);
 
     frame_time = SDL_GetTicks64() - frame_start;
     if (tpf > frame_time) {

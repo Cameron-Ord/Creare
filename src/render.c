@@ -39,17 +39,15 @@ static SDL_Rect create_viewport(const int w, const int h) {
 const int sheet_tile_width = 32;
 const int sheet_tile_height = 32;
 
-void render_new_option(WindowData *win, RendererData *rend, Sprite *spr) {}
+void render_new_option(RendererData *rend, Sprite *spr) {
+  const int characters = 3;
+  const int tileset_width = sheet_tile_width * characters;
 
-void render_load_option(WindowData *win, RendererData *rend, Sprite *spr) {}
+  Coordinates c = rend->coord;
+  Grid g = c.grid;
 
-void render_logo(WindowData *win, RendererData *rend, Sprite *spr) {
-  const int characters = 4;
-  const int tile_height = 64;
-  const int tile_width = 64;
-
-  const int columns = win->width / tile_width;
-  const int rows = win->height / tile_height;
+  int t_width = g.tile_width / 2, t_height = g.tile_height / 2;
+  int rows = g.rows * 2, columns = g.columns * 2;
 
   SDL_Rect src[characters];
   SDL_Rect dst[characters];
@@ -57,22 +55,90 @@ void render_logo(WindowData *win, RendererData *rend, Sprite *spr) {
   SDL_Rect *srcptr = &src[0];
   SDL_Rect *dstptr = &dst[0];
 
-  const int total_width = sheet_tile_width * characters;
-  int current_column = 1;
+  for (int j = 0, k = 2; j < tileset_width && k < columns;
+       j += sheet_tile_width, k++) {
+    (*srcptr).x = j, (*srcptr).y = 0, (*srcptr).w = sheet_tile_width,
+    (*srcptr).h = sheet_tile_height;
 
-  for (int i = 0; i < total_width; i += sheet_tile_width) {
-    (*srcptr).x = i, (*srcptr).y = sheet_tile_height * 2,
-    (*srcptr).w = sheet_tile_width, (*srcptr).h = sheet_tile_height;
+    // Plot rect onto the grid
+    const int plotx = (k * t_width);
+    const int ploty = ((3 * 2) * t_height);
 
-    const int x = (current_column * tile_width) - (tile_width * 0.5);
-    const int y = (1 * tile_width) - (tile_height * 0.5);
-
-    (*dstptr).x = x, (*dstptr).y = y, (*dstptr).w = tile_width,
-    (*dstptr).h = tile_height;
+    (*dstptr).x = plotx, (*dstptr).y = ploty, (*dstptr).w = t_width,
+    (*dstptr).h = t_height;
 
     SDL_RenderCopy(rend->r, spr->texture, srcptr, dstptr);
 
-    current_column += 2;
+    srcptr++;
+    dstptr++;
+  }
+}
+
+void render_load_option(RendererData *rend, Sprite *spr) {
+  const int characters = 4;
+  const int tileset_width = sheet_tile_width * characters;
+
+  Coordinates c = rend->coord;
+  Grid g = c.grid;
+
+  int t_width = g.tile_width / 2, t_height = g.tile_height / 2;
+  int rows = g.rows * 2, columns = g.columns * 2;
+
+  SDL_Rect src[characters];
+  SDL_Rect dst[characters];
+
+  SDL_Rect *srcptr = &src[0];
+  SDL_Rect *dstptr = &dst[0];
+
+  for (int j = 0, k = 2; j < tileset_width && k < columns;
+       j += sheet_tile_width, k++) {
+    (*srcptr).x = j, (*srcptr).y = sheet_tile_height,
+    (*srcptr).w = sheet_tile_width, (*srcptr).h = sheet_tile_height;
+
+    // Plot rect onto the grid
+    const int plotx = (k * t_width);
+    const int ploty = ((3 * 3) * t_height);
+
+    (*dstptr).x = plotx, (*dstptr).y = ploty, (*dstptr).w = t_width,
+    (*dstptr).h = t_height;
+
+    SDL_RenderCopy(rend->r, spr->texture, srcptr, dstptr);
+
+    srcptr++;
+    dstptr++;
+  }
+}
+
+void render_logo(RendererData *rend, Sprite *spr) {
+  const int characters = 4;
+  const int tileset_width = sheet_tile_width * characters;
+
+  Coordinates c = rend->coord;
+  Grid g = c.grid;
+
+  int t_width = g.tile_width * 2, t_height = g.tile_height * 2;
+  int rows = g.rows / 2, columns = g.columns / 2;
+
+  SDL_Rect src[characters];
+  SDL_Rect dst[characters];
+
+  SDL_Rect *srcptr = &src[0];
+  SDL_Rect *dstptr = &dst[0];
+
+  for (int j = 0, k = 0; j < tileset_width && k < columns;
+       j += sheet_tile_width, k++) {
+    (*srcptr).x = j, (*srcptr).y = sheet_tile_height * 2,
+    (*srcptr).w = sheet_tile_width, (*srcptr).h = sheet_tile_height;
+
+    // Plot rect onto the grid
+    const int plotx = (k * t_width);
+    const int ploty = 0;
+
+    (*dstptr).x = plotx, (*dstptr).y = ploty, (*dstptr).w = t_width,
+    (*dstptr).h = t_height;
+
+    SDL_RenderCopy(rend->r, spr->texture, srcptr, dstptr);
+
     srcptr++;
     dstptr++;
   }

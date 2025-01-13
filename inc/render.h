@@ -12,33 +12,29 @@ typedef struct SDL_Renderer SDL_Renderer;
 typedef struct WindowData WindowData;
 
 typedef struct {
-  int real;
-  int viewport;
-} Vec2i;
-
-typedef struct {
   int rows, columns;
   int tile_width, tile_height;
 } Grid;
 
 struct Coordinates {
   int width, height;
-  Vec2i x, y;
   Grid grid;
 };
 
+typedef struct Coordinates Coordinates;
+
 struct RendererData {
   SDL_Renderer *r;
+  Coordinates coord;
 };
 
-typedef struct Coordinates Coordinates;
 typedef struct RendererData RendererData;
 
+Coordinates set_window_vga(const WindowData *win);
 RendererData create_renderer(WindowData *win);
-
-void render_new_option(WindowData *win, RendererData *rend, Sprite *spr);
-void render_load_option(WindowData *win, RendererData *rend, Sprite *spr);
-void render_logo(WindowData *win, RendererData *rend, Sprite *spr);
+void render_logo(RendererData *rend, Sprite *spr);
+void render_load_option(RendererData *rend, Sprite *spr);
+void render_new_option(RendererData *rend, Sprite *spr);
 void render_clear(RendererData *rend);
 void render_base_bg(RendererData *rend);
 void render_present(RendererData *rend);

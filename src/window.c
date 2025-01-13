@@ -1,8 +1,9 @@
 #include "../inc/window.h"
+#include "../inc/render.h"
 #include <SDL2/SDL.h>
 
-#define DFT_HEIGHT 480
-#define DFT_WIDTH 640
+#define DFT_HEIGHT 240
+#define DFT_WIDTH 320
 
 WindowData create_win(void) {
   WindowData win = {.w = NULL, .width = DFT_WIDTH, .height = DFT_HEIGHT};
