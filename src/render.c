@@ -8,7 +8,7 @@ static SDL_Rect create_viewport(const int w, const int h);
 void render_clear(RendererData *rend) { SDL_RenderClear(rend->r); }
 
 void render_base_bg(RendererData *rend) {
-  SDL_SetRenderDrawColor(rend->r, 248, 248, 242, 255);
+  SDL_SetRenderDrawColor(rend->r, 27, 29, 30, 255);
 }
 
 void render_present(RendererData *rend) { SDL_RenderPresent(rend->r); }
