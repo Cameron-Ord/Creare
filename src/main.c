@@ -1,11 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include "../inc/binary.h"
 #include "../inc/font.h"
 #include "../inc/gfx.h"
 #include "../inc/render.h"
@@ -19,8 +16,7 @@ int map[MAP_HEIGHT][MAP_WIDTH];
 // #define DFT_HEIGHT 720
 // #define DFT_WIDTH 1280
 
-const char *font_file = "dogicapixel.ttf";
-const char *logo_file = "tmlc-logo.png";
+const char *logo_file = "tmlcpixel.png";
 
 int main(int argc, char **argv) {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
@@ -33,50 +29,38 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if (TTF_Init() < 0) {
-    fprintf(stderr, "Failed to load SDL2_ttf! Error: %s\n", TTF_GetError());
-    return 1;
-  }
-
-  WindowData win = create_win();
-  if (!win.w) {
+  if (!create_win()) {
     SDL_Quit();
     return 1;
   }
 
-  RendererData rend = create_renderer(&win);
-  if (!rend.r) {
-    SDL_DestroyWindow(win.w);
+  if (!create_renderer(get_window())) {
+    SDL_DestroyWindow(get_window()->w);
     SDL_Quit();
     return 1;
   }
 
-  rend.coord = set_window_vga(&win);
+  set_window_vga(get_window());
 
-  FontData font = create_font(font_file);
-  if (!font.font) {
-    fprintf(stderr, "Failed to open font! Error: %s\n", TTF_GetError());
+  Sprite char_sheet = create_sprite(logo_file, get_renderer());
+  if (!char_sheet.valid) {
     return 1;
   }
 
-  Sprite logo = create_sprite(logo_file, &rend);
-  if (!logo.valid) {
-    return 1;
-  }
-
+  char_set_table();
   int running = 1;
 
-  const int tpf = (1000.0 / 60);
+  const int tpf = (1000.0 / 30);
   uint64_t frame_start;
   int frame_time;
 
   SDL_EnableScreenSaver();
-  SDL_ShowWindow(win.w);
+  SDL_ShowWindow(get_window()->w);
   while (running) {
     frame_start = SDL_GetTicks64();
 
-    render_base_bg(&rend);
-    render_clear(&rend);
+    render_base_bg();
+    render_clear();
 
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
@@ -92,19 +76,17 @@ int main(int argc, char **argv) {
       }
     }
 
-    render_logo(&rend, &logo);
-    render_new_option(&rend, &logo);
-    render_load_option(&rend, &logo);
+    const char *string = "FARTOMOGUS";
+    render_str(1, 0, string, strlen(string), &char_sheet);
 
     frame_time = SDL_GetTicks64() - frame_start;
     if (tpf > frame_time) {
       SDL_Delay(tpf - frame_time);
     }
 
-    render_present(&rend);
+    render_present();
   }
 
-  TTF_Quit();
   IMG_Quit();
   SDL_Quit();
 

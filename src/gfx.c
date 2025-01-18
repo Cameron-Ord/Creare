@@ -14,6 +14,7 @@ Sprite create_sprite(const char *fn, RendererData *rend) {
     return spr;
   }
 
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
   spr.texture = SDL_CreateTextureFromSurface(rend->r, spr.surface);
   if (!spr.texture) {
     SDL_FreeSurface(spr.surface);

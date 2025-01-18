@@ -1,6 +1,6 @@
 #ifndef RENDER_H
 #define RENDER_H
-
+#include <stddef.h>
 // Defined elsewhere in other headers. Just forward declare and include headers
 // in source files.
 struct WindowData;
@@ -11,9 +11,14 @@ typedef struct Sprite Sprite;
 typedef struct SDL_Renderer SDL_Renderer;
 typedef struct WindowData WindowData;
 
+struct TileDm {
+  int w, h;
+};
+
+typedef struct TileDm TileDm;
+
 typedef struct {
   int rows, columns;
-  int tile_width, tile_height;
 } Grid;
 
 struct Coordinates {
@@ -29,15 +34,16 @@ struct RendererData {
 };
 
 typedef struct RendererData RendererData;
-
-Coordinates set_window_vga(const WindowData *win);
-RendererData create_renderer(WindowData *win);
-void render_logo(RendererData *rend, Sprite *spr);
-void render_load_option(RendererData *rend, Sprite *spr);
-void render_new_option(RendererData *rend, Sprite *spr);
-void render_clear(RendererData *rend);
-void render_base_bg(RendererData *rend);
-void render_present(RendererData *rend);
-void render_grid(RendererData *rend, Coordinates *c);
+TileDm get_tile_size(void);
+void render_str(const int row, const int col, const char *str, const size_t len,
+                const Sprite *spr);
+void set_window_vga(const WindowData *win);
+int create_renderer(WindowData *win);
+RendererData *get_renderer(void);
+void render_clear(void);
+void render_base_bg(void);
+void render_present(void);
+void render_grid(Coordinates *c);
+void render_char(const int x, const int y, const char c, const Sprite *spr);
 
 #endif // RENDER_H

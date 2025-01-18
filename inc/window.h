@@ -11,5 +11,6 @@ struct WindowData {
 
 typedef struct WindowData WindowData;
 
-WindowData create_win(void);
+WindowData *get_window(void);
+int create_win(void);
 #endif
