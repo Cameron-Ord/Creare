@@ -76,8 +76,9 @@ int main(int argc, char **argv) {
       }
     }
 
-    const char *string = "FARTOMOGUS";
-    render_str(1, 0, string, strlen(string), &char_sheet);
+    RenderStr str = {get_render_grids()->big.rows / 2, 0, "FARTOMOGUS",
+                     strlen("FARTOMOGUS")};
+    render_str(&str, &char_sheet, &get_render_grids()->big);
 
     frame_time = SDL_GetTicks64() - frame_start;
     if (tpf > frame_time) {

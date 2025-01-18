@@ -5,7 +5,6 @@
 
 RendererData rend = {0};
 TileDm tile_size = {16, 16};
-
 TileDm get_tile_size(void) { return tile_size; }
 
 int create_renderer(WindowData *win) {
@@ -21,19 +20,23 @@ int create_renderer(WindowData *win) {
 }
 
 void set_window_vga(const WindowData *win) {
-  const int rows = win->height / tile_size.h,
-            columns = win->width / tile_size.w;
+  const int rows_norm = win->height / tile_size.h,
+            columns_norm = win->width / tile_size.w;
 
-  fprintf(stdout, "ROWS: %d COLS: %d TILE_WIDTH: %d TILE_HEIGHT: %d\n", rows,
-          columns, tile_size.w, tile_size.h);
+  const int rows_small = win->height / (tile_size.h / 2),
+            columns_small = win->width / (tile_size.w / 2);
 
-  Grid grid = {
-      rows,
-      columns,
-  };
+  const int rows_big = win->height / (tile_size.h * 2),
+            columns_big = win->width / (tile_size.w * 2);
 
-  Coordinates coords = {win->width, win->height, grid};
+  Grid grid_norm = {rows_norm, columns_norm, tile_size.w, tile_size.h};
+  Grid grid_small = {rows_small, columns_small, tile_size.w / 2,
+                     tile_size.h / 2};
+  Grid grid_big = {rows_big, columns_big, tile_size.w * 2, tile_size.h * 2};
+
+  Coordinates coords = {grid_big, grid_small, grid_norm};
   rend.coord = coords;
 }
 
+Coordinates *get_render_grids(void) { return &rend.coord; }
 RendererData *get_renderer(void) { return &rend; }
