@@ -60,7 +60,7 @@ message("")
 if(WIN32 OR MSYS)
   message("-- BUILDING FOR WINDOWS!")
 
-  add_executable(tmlc WIN32 ${SOURCES})
+  add_executable(tmlc  ${SOURCES})
   target_compile_definitions(tmlc PRIVATE SDL_MAIN_HANDLED)
   target_compile_options(tmlc PRIVATE -Wall -Wextra -pedantic)
 

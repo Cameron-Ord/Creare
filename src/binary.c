@@ -24,9 +24,9 @@ int check_ftype(const int idx, const char *arg)
     }
 
     const size_t len = strlen(arg) + 1;
-    char         buffer[len];
-    int          i = idx;
-    int          j = 0;
+    char buffer[len];
+    int i = idx;
+    int j = 0;
 
     while (arg[i] != '\0') {
         buffer[j] = arg[i];
@@ -43,11 +43,11 @@ int check_ftype(const int idx, const char *arg)
 }
 
 const int HEADER_SIZE = 3;
-crx_spec  read_file(const char *fn)
+crx_spec read_file(const char *fn)
 {
     fprintf(stdout, "Reading : %s\n", fn);
     crx_spec spec = {0};
-    int      read;
+    int read;
 
     FILE *fptr = fopen(fn, "rb");
     if (!fptr) {
@@ -58,7 +58,7 @@ crx_spec  read_file(const char *fn)
 
     char header[HEADER_SIZE + 1];
     char req_header[] = {'C', 'R', 'X'};
-    read              = fread(header, sizeof(char), 3, fptr);
+    read = fread(header, sizeof(char), 3, fptr);
     if (read != 3 || ferror(fptr)) {
         fprintf(stderr, "Could not read file! Error: %s\n", strerror(errno));
         fclose(fptr);
@@ -90,7 +90,7 @@ crx_spec create_file(const char *fn)
 {
     fprintf(stdout, "Creating : %s\n", fn);
     crx_spec spec = {0};
-    int      written;
+    int written;
 
     FILE *fptr = fopen(fn, "wb");
     if (!fptr) {
@@ -100,7 +100,7 @@ crx_spec create_file(const char *fn)
     }
 
     const char header[] = {'C', 'R', 'X'};
-    written             = fwrite(header, sizeof(char), 3, fptr);
+    written = fwrite(header, sizeof(char), 3, fptr);
     if (written != 3 || ferror(fptr)) {
         fprintf(stderr, "Failed to write to file! Error: %s\n",
                 strerror(errno));

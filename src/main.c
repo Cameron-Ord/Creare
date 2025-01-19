@@ -10,13 +10,29 @@
 
 #define MAP_HEIGHT 1200
 #define MAP_WIDTH 1800
+typedef enum
+{
+    MENU = 0,
+    CREATOR = 1
+} Modes;
+
+const char *strings[] = {"NEW", "LOAD"};
+const int sizes[] = {3, 4};
+
+int menu_cursor = 0;
+const int selection_offset[] = {0, 16 * 5};
+
+const int modes[] = {MENU, CREATOR};
+int current_mode = MENU;
 
 int map[MAP_HEIGHT][MAP_WIDTH];
 
 // #define DFT_HEIGHT 720
 // #define DFT_WIDTH 1280
 
-const char *logo_file = "tmlcpixel.png";
+const char *charsheet_fn = "chars.png";
+
+static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s);
 
 int main(int argc, char **argv)
 {
@@ -48,7 +64,7 @@ int main(int argc, char **argv)
 
     Grid current_grid = get_sd_grids()[1];
 
-    Sprite char_sheet = create_sprite(logo_file, get_renderer());
+    Sprite char_sheet = create_sprite(charsheet_fn, get_renderer());
     if (!char_sheet.valid) {
         return 1;
     }
@@ -57,8 +73,8 @@ int main(int argc, char **argv)
     int running = 1;
 
     const int tpf = (1000.0 / 30);
-    uint64_t  frame_start;
-    int       frame_time;
+    uint64_t frame_start;
+    int frame_time;
 
     SDL_EnableScreenSaver();
     SDL_ShowWindow(get_window()->w);
@@ -71,9 +87,48 @@ int main(int argc, char **argv)
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
+            default:
+                break;
 
             case SDL_KEYDOWN:
             {
+                const uint32_t keycode = e.key.keysym.sym;
+                const uint16_t keymod = e.key.keysym.mod;
+
+                switch (current_mode) {
+                default:
+                    break;
+
+                case MENU:
+                {
+                    switch (keycode) {
+                    default:
+                        break;
+                    case SDLK_RETURN:
+                    {
+                        // Set to creator mode, create a new crx file or load one. Then make resolution change to window and present grid.
+                    } break;
+
+                    case SDLK_UP:
+                    {
+                        menu_cursor = !menu_cursor;
+                    } break;
+
+                    case SDLK_DOWN:
+                    {
+                        menu_cursor = !menu_cursor;
+                    } break;
+                    }
+                } break;
+
+                case CREATOR:
+                {
+                    switch (keycode) {
+                    default:
+                        break;
+                    }
+                } break;
+                }
             } break;
 
             case SDL_QUIT:
@@ -82,6 +137,8 @@ int main(int argc, char **argv)
             } break;
             }
         }
+
+        paint_menu(strings, sizes, &current_grid, &char_sheet);
 
         frame_time = SDL_GetTicks64() - frame_start;
         if (tpf > frame_time) {
@@ -95,6 +152,14 @@ int main(int argc, char **argv)
     SDL_Quit();
 
     return 0;
+}
+
+static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s)
+{
+    Vec4i new_prompt = {.x = 3, .y = 3, .offset_x = selection_offset[menu_cursor], .offset_y = 0};
+    render_str(new_prompt, g, s, strings[0], sizes[0]);
+    Vec4i load_prompt = {.x = 3, .y = 4, .offset_x = selection_offset[!menu_cursor], .offset_y = 0};
+    render_str(load_prompt, g, s, strings[1], sizes[1]);
 }
 
 /* These comments are just notes to myself. */

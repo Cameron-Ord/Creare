@@ -22,6 +22,13 @@ typedef struct {
   int tile_w, tile_h;
 } Grid;
 
+struct Vec4i{
+  int x,y;
+  int offset_x, offset_y;
+};
+
+typedef struct Vec4i Vec4i;
+
 struct RenderStr {
   int row, col;
   char *str;
@@ -48,5 +55,5 @@ void render_clear(void);
 void render_base_bg(void);
 void render_present(void);
 void render_grid(Grid *g, const int w, const int h);
-
+void render_str(Vec4i pos, const Grid *g,const Sprite *s, const char *str, const int len);
 #endif // RENDER_H
