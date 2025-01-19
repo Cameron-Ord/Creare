@@ -18,81 +18,83 @@ int map[MAP_HEIGHT][MAP_WIDTH];
 
 const char *logo_file = "tmlcpixel.png";
 
-int main(int argc, char **argv) {
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
-    fprintf(stderr, "Failed to initialize SDL2! Error: %s\n", SDL_GetError());
-    return 1;
-  }
-
-  if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG)) {
-    fprintf(stderr, "Failed to load SDL2_image! Error: %s\n", IMG_GetError());
-    return 1;
-  }
-
-  if (!create_win()) {
-    SDL_Quit();
-    return 1;
-  }
-
-  if (!create_renderer(get_window())) {
-    SDL_DestroyWindow(get_window()->w);
-    SDL_Quit();
-    return 1;
-  }
-
-  set_window_sd(get_window());
-  set_window_hd(get_window());
-
-  Grid current_grid = get_sd_grids()[1];
-
-  Sprite char_sheet = create_sprite(logo_file, get_renderer());
-  if (!char_sheet.valid) {
-    return 1;
-  }
-
-  char_set_table();
-  int running = 1;
-
-  const int tpf = (1000.0 / 30);
-  uint64_t frame_start;
-  int frame_time;
-
-  SDL_EnableScreenSaver();
-  SDL_ShowWindow(get_window()->w);
-  while (running) {
-    frame_start = SDL_GetTicks64();
-
-    render_base_bg();
-    render_clear();
-
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-      switch (e.type) {
-
-      case SDL_KEYDOWN: {
-
-      } break;
-
-      case SDL_QUIT: {
-        running = 0;
-      } break;
-      }
+int main(int argc, char **argv)
+{
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
+        fprintf(stderr, "Failed to initialize SDL2! Error: %s\n",
+                SDL_GetError());
+        return 1;
     }
 
-    
-
-    frame_time = SDL_GetTicks64() - frame_start;
-    if (tpf > frame_time) {
-      SDL_Delay(tpf - frame_time);
+    if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG)) {
+        fprintf(stderr, "Failed to load SDL2_image! Error: %s\n",
+                IMG_GetError());
+        return 1;
     }
 
-    render_present();
-  }
+    if (!create_win()) {
+        SDL_Quit();
+        return 1;
+    }
 
-  IMG_Quit();
-  SDL_Quit();
+    if (!create_renderer(get_window())) {
+        SDL_DestroyWindow(get_window()->w);
+        SDL_Quit();
+        return 1;
+    }
 
-  return 0;
+    set_window_sd(get_window());
+    set_window_hd(get_window());
+
+    Grid current_grid = get_sd_grids()[1];
+
+    Sprite char_sheet = create_sprite(logo_file, get_renderer());
+    if (!char_sheet.valid) {
+        return 1;
+    }
+
+    char_set_table();
+    int running = 1;
+
+    const int tpf = (1000.0 / 30);
+    uint64_t  frame_start;
+    int       frame_time;
+
+    SDL_EnableScreenSaver();
+    SDL_ShowWindow(get_window()->w);
+    while (running) {
+        frame_start = SDL_GetTicks64();
+
+        render_base_bg();
+        render_clear();
+
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
+
+            case SDL_KEYDOWN:
+            {
+            } break;
+
+            case SDL_QUIT:
+            {
+                running = 0;
+            } break;
+            }
+        }
+
+        frame_time = SDL_GetTicks64() - frame_start;
+        if (tpf > frame_time) {
+            SDL_Delay(tpf - frame_time);
+        }
+
+        render_present();
+    }
+
+    IMG_Quit();
+    SDL_Quit();
+
+    return 0;
 }
 
 /* These comments are just notes to myself. */
