@@ -30,8 +30,8 @@ void render_str(Vec4i pos, const Grid *g, const Sprite *s, const char *str, cons
     TileDm char_size = get_font_sizing();
 
     for (int i = 0, j = pos.x; i < len; i++, j++) {
-        if(not_known(str[i]) || str[i] == 32){
-          continue;
+        if (not_known(str[i]) || str[i] == 32) {
+            continue;
         }
 
         CharTable t = table_get_char(str[i]);

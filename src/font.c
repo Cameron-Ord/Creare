@@ -14,9 +14,10 @@ const int table_cols = 13 * char_width;
 
 const char *char_str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
 
-int not_known(const char c){
-    for(size_t i = 0; i < strlen(char_str); i++){
-        if(c == char_str[i]){
+int not_known(const char c)
+{
+    for (size_t i = 0; i < strlen(char_str); i++) {
+        if (c == char_str[i]) {
             return 0;
         }
     }

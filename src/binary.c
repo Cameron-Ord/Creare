@@ -122,7 +122,7 @@ CrxSpec create_file(const char *fn)
     const size_t home_length = strlen(home);
     const size_t fn_length = strlen(fn);
     const size_t dir_length = strlen(directory);
-    const size_t slash_length = strlen(slash)*2;
+    const size_t slash_length = strlen(slash) * 2;
     const size_t ext_length = strlen(".crx");
 
     const size_t size = home_length + fn_length + dir_length + slash_length + ext_length + 1;
