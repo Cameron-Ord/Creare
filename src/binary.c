@@ -2,8 +2,8 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 char *home = NULL;
 
@@ -12,16 +12,15 @@ const char *home_env = "USERPROFILE";
 const char *slash = "\\";
 #endif
 
-
 #ifdef __linux__
 const char *home_env = "HOME";
 const char *slash = "/";
 #endif
 
-
-int set_home_env(void){
+int set_home_env(void)
+{
     home = getenv(home_env);
-    if(!home){
+    if (!home) {
         return 0;
     }
 
@@ -128,12 +127,12 @@ CrxSpec create_file(const char *fn)
     const size = home_length + fn_length + dir_length + slash_length + 1;
 
     file_path = malloc(size);
-    if(!file_path){
+    if (!file_path) {
         fprintf(stderr, "Malloc() failed! Error: %s\n", strerror(errno));
         return spec;
     }
 
-    if(!snprintf(file_path, size, "%s%s%s%s", home, slash, directory, fn)){
+    if (!snprintf(file_path, size, "%s%s%s%s", home, slash, directory, fn)) {
         fprintf(stderr, "snprintf() failed! Error: %s\n", strerror(errno));
         free(file_path);
         return spec;

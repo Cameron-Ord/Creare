@@ -11,34 +11,39 @@ typedef struct Sprite Sprite;
 typedef struct SDL_Renderer SDL_Renderer;
 typedef struct WindowData WindowData;
 
-struct TileDm {
-  int w, h;
+struct TileDm
+{
+    int w, h;
 };
 
 typedef struct TileDm TileDm;
 
-typedef struct {
-  int rows, columns;
-  int tile_w, tile_h;
+typedef struct
+{
+    int rows, columns;
+    int tile_w, tile_h;
 } Grid;
 
-struct Vec4i{
-  int x,y;
-  int offset_x, offset_y;
+struct Vec4i
+{
+    int x, y;
+    int offset_x, offset_y;
 };
 
 typedef struct Vec4i Vec4i;
 
-struct RenderStr {
-  int row, col;
-  char *str;
-  size_t len;
+struct RenderStr
+{
+    int row, col;
+    char *str;
+    size_t len;
 };
 
 typedef struct RenderStr RenderStr;
 
-struct RendererData {
-  SDL_Renderer *r;
+struct RendererData
+{
+    SDL_Renderer *r;
 };
 
 typedef struct RendererData RendererData;
@@ -55,5 +60,5 @@ void render_clear(void);
 void render_base_bg(void);
 void render_present(void);
 void render_grid(Grid *g, const int w, const int h);
-void render_str(Vec4i pos, const Grid *g,const Sprite *s, const char *str, const int len);
+void render_str(Vec4i pos, const Grid *g, const Sprite *s, const char *str, const int len);
 #endif // RENDER_H

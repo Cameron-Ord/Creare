@@ -1,8 +1,9 @@
 #ifndef FONT_H
 #define FONT_H
 
-struct CharTable {
-  int x, y;
+struct CharTable
+{
+    int x, y;
 };
 
 typedef struct CharTable CharTable;

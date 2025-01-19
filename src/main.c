@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../inc/binary.h"
 #include "../inc/font.h"
 #include "../inc/gfx.h"
 #include "../inc/render.h"
 #include "../inc/window.h"
-#include "../inc/binary.h"
 
 #define MAP_HEIGHT 1200
 #define MAP_WIDTH 1800
@@ -20,9 +20,10 @@ typedef enum
     FILE_TREE = 3
 } Modes;
 
-typedef enum {
-  NEW = 0,
-  LOAD = 1
+typedef enum
+{
+    NEW = 0,
+    LOAD = 1
 } Selections;
 
 const char *strings[] = {"NEW", "LOAD"};
@@ -46,9 +47,9 @@ static void paint_menu(const char **strings, const int *sizes, const Grid *g, co
 int main(int argc, char **argv)
 {
 
-  if(!set_home_env()){
-    return 1;
-  }
+    if (!set_home_env()) {
+        return 1;
+    }
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
         fprintf(stderr, "Failed to initialize SDL2! Error: %s\n",
@@ -123,17 +124,19 @@ int main(int argc, char **argv)
                     case SDLK_RETURN:
                     {
                         // Set to creator mode, create a new crx file or load one. Then make resolution change to window and present grid.
-                      switch(menu_cursor){
-                        case NEW:{
-                          set_mode(TAKE_INPUT);
-                          SDL_StartTextInput();
-                        }break;
+                        switch (menu_cursor) {
+                        case NEW:
+                        {
+                            set_mode(TAKE_INPUT);
+                            SDL_StartTextInput();
+                        } break;
 
-                        case LOAD:{
-                          set_mode(FILE_TREE);
-                        }break;
-                      }
-                    
+                        case LOAD:
+                        {
+                            set_mode(FILE_TREE);
+                        } break;
+                        }
+
                     } break;
 
                     case SDLK_UP:
@@ -148,19 +151,21 @@ int main(int argc, char **argv)
                     }
                 } break;
 
-                case FILE_TREE:{
+                case FILE_TREE:
+                {
                     switch (keycode) {
                     default:
                         break;
                     }
-                }break;
+                } break;
 
-                case TAKE_INPUT:{
+                case TAKE_INPUT:
+                {
                     switch (keycode) {
                     default:
                         break;
                     }
-                }break;
+                } break;
 
                 case CREATOR:
                 {
@@ -181,25 +186,29 @@ int main(int argc, char **argv)
 
         //Render stuff depending on the current mode.
 
-        switch(current_mode){
-          default:break;
-          case MENU:{
+        switch (current_mode) {
+        default:
+            break;
+        case MENU:
+        {
             paint_menu(strings, sizes, &current_grid, &char_sheet);
-          }break;
+        } break;
 
-          case CREATOR:{
+        case CREATOR:
+        {
 
-          }break;
+        } break;
 
-          case TAKE_INPUT:{
-            
-          }break;
+        case TAKE_INPUT:
+        {
 
-          case FILE_TREE:{
+        } break;
 
-          }break;
+        case FILE_TREE:
+        {
+
+        } break;
         }
-
 
         frame_time = SDL_GetTicks64() - frame_start;
         if (tpf > frame_time) {
@@ -215,8 +224,9 @@ int main(int argc, char **argv)
     return 0;
 }
 
-static void set_mode(const int mode_value){
-  current_mode = mode_value;
+static void set_mode(const int mode_value)
+{
+    current_mode = mode_value;
 }
 
 static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s)

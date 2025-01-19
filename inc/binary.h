@@ -1,9 +1,16 @@
 #ifndef BINARY_H
 #define BINARY_H
 
-typedef enum { N = 110, H = 104, E = 101, PERIOD = 46 } ascii_codes;
-typedef struct {
-  int x, j, g, valid;
+typedef enum
+{
+    N = 110,
+    H = 104,
+    E = 101,
+    PERIOD = 46
+} ascii_codes;
+typedef struct
+{
+    int x, j, g, valid;
 } CrxSpec;
 
 int set_home_env(void);
