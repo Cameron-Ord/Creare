@@ -9,13 +9,19 @@ CharTable char_table[128];
 const int char_width = 16;
 const int char_height = 16;
 
-const int table_rows = 6 * char_height;
-const int table_cols = 5 * char_width;
+const int table_rows = 12 * char_height;
+const int table_cols = 13 * char_width;
 
-const int row_offsets[] = {0, table_rows};
-const int col_offsets[] = {0, table_cols, table_cols * 2};
+const char *char_str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ";
 
-const char *char_str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+int not_known(const char c){
+    for(size_t i = 0; i < strlen(char_str); i++){
+        if(c == char_str[i]){
+            return 0;
+        }
+    }
+    return 1;
+}
 
 void char_set_table(void)
 {
@@ -29,7 +35,7 @@ void char_set_table(void)
             row += char_height;
         }
 
-        if (row >= table_rows) {
+        if (row > table_rows) {
             break;
         }
 

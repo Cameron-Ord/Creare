@@ -122,9 +122,10 @@ CrxSpec create_file(const char *fn)
     const size_t home_length = strlen(home);
     const size_t fn_length = strlen(fn);
     const size_t dir_length = strlen(directory);
-    const size_t slash_length = strlen(slash);
+    const size_t slash_length = strlen(slash)*2;
+    const size_t ext_length = strlen(".crx");
 
-    const size = home_length + fn_length + dir_length + slash_length + 1;
+    const size_t size = home_length + fn_length + dir_length + slash_length + ext_length + 1;
 
     file_path = malloc(size);
     if (!file_path) {
@@ -132,12 +133,13 @@ CrxSpec create_file(const char *fn)
         return spec;
     }
 
-    if (!snprintf(file_path, size, "%s%s%s%s", home, slash, directory, fn)) {
+    if (!snprintf(file_path, size, "%s%s%s%s%s%s", home, slash, directory, slash, fn, ".crx")) {
         fprintf(stderr, "snprintf() failed! Error: %s\n", strerror(errno));
         free(file_path);
         return spec;
     }
 
+    printf("Opening file at : %s\n", file_path);
     FILE *fptr = fopen(file_path, "wb");
     if (!fptr) {
         fprintf(stderr, "Failed to open file in write mode! Error: %s\n",

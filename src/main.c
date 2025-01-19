@@ -2,11 +2,13 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "../inc/binary.h"
 #include "../inc/font.h"
 #include "../inc/gfx.h"
 #include "../inc/render.h"
+#include "../inc/input.h"
 #include "../inc/window.h"
 
 #define MAP_HEIGHT 1200
@@ -30,7 +32,7 @@ const char *strings[] = {"NEW", "LOAD"};
 const int sizes[] = {3, 4};
 
 int menu_cursor = 0;
-const int selection_offset[] = {0, 16 * 5};
+const int y_offsets[] = {0, 4 * 16};
 
 int current_mode = MENU;
 
@@ -41,6 +43,7 @@ int map[MAP_HEIGHT][MAP_WIDTH];
 
 const char *charsheet_fn = "chars.png";
 
+static void update_window(const int w, const int h);
 static void set_mode(const int mode_value);
 static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s);
 
@@ -85,8 +88,18 @@ int main(int argc, char **argv)
     }
 
     char_set_table();
-    int running = 1;
 
+    char *input_buffer = malloc(1);
+    if(!input_buffer){
+      fprintf(stderr, "malloc() failed! Error: %s\n", strerror(errno));
+      return 1;
+    }
+
+    input_buffer[0] = '\0';
+
+    InputMap input_mapper = {.input_buffer = input_buffer, .char_cursor = 0, .size = 1, .char_max = get_sd_grids()[0].columns - 1};
+
+    int running = 1;
     const int tpf = (1000.0 / 30);
     uint64_t frame_start;
     int frame_time;
@@ -106,6 +119,16 @@ int main(int argc, char **argv)
             switch (e.type) {
             default:
                 break;
+
+            case SDL_TEXTINPUT:{
+              const char *text = e.text.text;
+              const size_t text_length = strlen(text);
+
+              for(size_t i = 0; i < text_length; i++){
+                insert_char(text[i], &input_mapper);
+              }
+
+            }break;
 
             case SDL_KEYDOWN:
             {
@@ -164,6 +187,15 @@ int main(int argc, char **argv)
                     switch (keycode) {
                     default:
                         break;
+
+                    case SDLK_BACKSPACE:{
+                      remove_last_char(&input_mapper);
+                    }break;
+
+                    case SDLK_RETURN:{
+                      SDL_StopTextInput();
+                      create_file(input_mapper.input_buffer);
+                    }break;
                     }
                 } break;
 
@@ -201,8 +233,13 @@ int main(int argc, char **argv)
 
         case TAKE_INPUT:
         {
+          Grid g = get_sd_grids()[0];
 
-        } break;
+          Vec4i pos = {.x= 1, .y = 0.5 * g.rows, .offset_x=0, .offset_y =0};
+          if(input_mapper.size >= 1){
+            render_str(pos, &g, &char_sheet, input_mapper.input_buffer, input_mapper.size);
+          }
+        } break;  
 
         case FILE_TREE:
         {
@@ -231,10 +268,17 @@ static void set_mode(const int mode_value)
 
 static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s)
 {
-    Vec4i new_prompt = {.x = 3, .y = 3, .offset_x = selection_offset[menu_cursor], .offset_y = 0};
+    Vec4i new_prompt = {.x = 3, .y = 3, .offset_x = 0 , .offset_y = y_offsets[menu_cursor]};
     render_str(new_prompt, g, s, strings[0], sizes[0]);
-    Vec4i load_prompt = {.x = 3, .y = 4, .offset_x = selection_offset[!menu_cursor], .offset_y = 0};
+    Vec4i load_prompt = {.x = 3, .y = 4, .offset_x = 0, .offset_y = y_offsets[!menu_cursor]};
     render_str(load_prompt, g, s, strings[1], sizes[1]);
+}
+
+static void update_window(const int w, const int h){
+  SDL_SetWindowSize(get_window()->w, 640, 480);
+  get_window()->height = 480;
+  get_window()->width = 640;
+  set_window_sd(get_window());
 }
 
 /* These comments are just notes to myself. */
