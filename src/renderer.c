@@ -2,6 +2,7 @@
 #include "../inc/render.h"
 #include "../inc/window.h"
 #include <SDL2/SDL_render.h>
+#include <stdio.h>
 
 RendererData rend = {0};
 TileDm tile_size = {16, 16};

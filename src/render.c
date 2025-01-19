@@ -2,6 +2,8 @@
 #include "../inc/font.h"
 #include "../inc/gfx.h"
 #include <SDL2/SDL_render.h>
+#include <stdio.h>
+
 
 static SDL_Rect create_viewport(const int w, const int h);
 

@@ -1,6 +1,7 @@
 #include "../inc/font.h"
 #include "../inc/render.h"
 #include <string.h>
+#include <stdio.h>
 
 // Size of ascii chars
 CharTable char_table[128];

@@ -1,6 +1,7 @@
 #include "../inc/window.h"
 #include "../inc/render.h"
 #include <SDL2/SDL.h>
+#include <stdio.h>
 
 #define DFT_HEIGHT 240
 #define DFT_WIDTH 320
