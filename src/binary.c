@@ -3,6 +3,31 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+char *home = NULL;
+
+#ifdef _WIN32
+const char *home_env = "USERPROFILE";
+const char *slash = "\\";
+#endif
+
+
+#ifdef __linux__
+const char *home_env = "HOME";
+const char *slash = "/";
+#endif
+
+
+int set_home_env(void){
+    home = getenv(home_env);
+    if(!home){
+        return 0;
+    }
+
+    fprintf(stdout, "Home: %s\n", home);
+    return 1;
+}
 
 int get_extension_idx(const char *arg)
 {
@@ -43,10 +68,10 @@ int check_ftype(const int idx, const char *arg)
 }
 
 const int HEADER_SIZE = 3;
-crx_spec read_file(const char *fn)
+CrxSpec read_file(const char *fn)
 {
     fprintf(stdout, "Reading : %s\n", fn);
-    crx_spec spec = {0};
+    CrxSpec spec = {0};
     int read;
 
     FILE *fptr = fopen(fn, "rb");
@@ -73,7 +98,7 @@ crx_spec read_file(const char *fn)
         return spec;
     }
 
-    read = fread(&spec, sizeof(crx_spec), 1, fptr);
+    read = fread(&spec, sizeof(CrxSpec), 1, fptr);
     if (read != 1 || ferror(fptr)) {
         fprintf(stderr, "Could not read file! Error: %s\n", strerror(errno));
         fclose(fptr);
@@ -86,13 +111,35 @@ crx_spec read_file(const char *fn)
     return spec;
 }
 
-crx_spec create_file(const char *fn)
+CrxSpec create_file(const char *fn)
 {
     fprintf(stdout, "Creating : %s\n", fn);
-    crx_spec spec = {0};
+    CrxSpec spec = {0};
     int written;
 
-    FILE *fptr = fopen(fn, "wb");
+    char *file_path = NULL;
+    const char *directory = "Documents";
+
+    const size_t home_length = strlen(home);
+    const size_t fn_length = strlen(fn);
+    const size_t dir_length = strlen(directory);
+    const size_t slash_length = strlen(slash);
+
+    const size = home_length + fn_length + dir_length + slash_length + 1;
+
+    file_path = malloc(size);
+    if(!file_path){
+        fprintf(stderr, "Malloc() failed! Error: %s\n", strerror(errno));
+        return spec;
+    }
+
+    if(!snprintf(file_path, size, "%s%s%s%s", home, slash, directory, fn)){
+        fprintf(stderr, "snprintf() failed! Error: %s\n", strerror(errno));
+        free(file_path);
+        return spec;
+    }
+
+    FILE *fptr = fopen(file_path, "wb");
     if (!fptr) {
         fprintf(stderr, "Failed to open file in write mode! Error: %s\n",
                 strerror(errno));
@@ -108,7 +155,7 @@ crx_spec create_file(const char *fn)
         return spec;
     }
 
-    written = fwrite(&spec, sizeof(crx_spec), 1, fptr);
+    written = fwrite(&spec, sizeof(CrxSpec), 1, fptr);
     if (written != 1 || ferror(fptr)) {
         fprintf(stderr, "Failed to write to file! Error: %s\n",
                 strerror(errno));

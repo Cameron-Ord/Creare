@@ -7,14 +7,23 @@
 #include "../inc/gfx.h"
 #include "../inc/render.h"
 #include "../inc/window.h"
+#include "../inc/binary.h"
 
 #define MAP_HEIGHT 1200
 #define MAP_WIDTH 1800
+
 typedef enum
 {
     MENU = 0,
-    CREATOR = 1
+    CREATOR = 1,
+    TAKE_INPUT = 2,
+    FILE_TREE = 3
 } Modes;
+
+typedef enum {
+  NEW = 0,
+  LOAD = 1
+} Selections;
 
 const char *strings[] = {"NEW", "LOAD"};
 const int sizes[] = {3, 4};
@@ -22,7 +31,6 @@ const int sizes[] = {3, 4};
 int menu_cursor = 0;
 const int selection_offset[] = {0, 16 * 5};
 
-const int modes[] = {MENU, CREATOR};
 int current_mode = MENU;
 
 int map[MAP_HEIGHT][MAP_WIDTH];
@@ -32,10 +40,16 @@ int map[MAP_HEIGHT][MAP_WIDTH];
 
 const char *charsheet_fn = "chars.png";
 
+static void set_mode(const int mode_value);
 static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s);
 
 int main(int argc, char **argv)
 {
+
+  if(!set_home_env()){
+    return 1;
+  }
+
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
         fprintf(stderr, "Failed to initialize SDL2! Error: %s\n",
                 SDL_GetError());
@@ -77,6 +91,8 @@ int main(int argc, char **argv)
     int frame_time;
 
     SDL_EnableScreenSaver();
+    SDL_StopTextInput();
+
     SDL_ShowWindow(get_window()->w);
     while (running) {
         frame_start = SDL_GetTicks64();
@@ -107,6 +123,17 @@ int main(int argc, char **argv)
                     case SDLK_RETURN:
                     {
                         // Set to creator mode, create a new crx file or load one. Then make resolution change to window and present grid.
+                      switch(menu_cursor){
+                        case NEW:{
+                          set_mode(TAKE_INPUT);
+                          SDL_StartTextInput();
+                        }break;
+
+                        case LOAD:{
+                          set_mode(FILE_TREE);
+                        }break;
+                      }
+                    
                     } break;
 
                     case SDLK_UP:
@@ -120,6 +147,20 @@ int main(int argc, char **argv)
                     } break;
                     }
                 } break;
+
+                case FILE_TREE:{
+                    switch (keycode) {
+                    default:
+                        break;
+                    }
+                }break;
+
+                case TAKE_INPUT:{
+                    switch (keycode) {
+                    default:
+                        break;
+                    }
+                }break;
 
                 case CREATOR:
                 {
@@ -138,7 +179,27 @@ int main(int argc, char **argv)
             }
         }
 
-        paint_menu(strings, sizes, &current_grid, &char_sheet);
+        //Render stuff depending on the current mode.
+
+        switch(current_mode){
+          default:break;
+          case MENU:{
+            paint_menu(strings, sizes, &current_grid, &char_sheet);
+          }break;
+
+          case CREATOR:{
+
+          }break;
+
+          case TAKE_INPUT:{
+            
+          }break;
+
+          case FILE_TREE:{
+
+          }break;
+        }
+
 
         frame_time = SDL_GetTicks64() - frame_start;
         if (tpf > frame_time) {
@@ -152,6 +213,10 @@ int main(int argc, char **argv)
     SDL_Quit();
 
     return 0;
+}
+
+static void set_mode(const int mode_value){
+  current_mode = mode_value;
 }
 
 static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s)
