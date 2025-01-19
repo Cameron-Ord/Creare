@@ -3,10 +3,22 @@
 #include "../inc/window.h"
 #include <SDL2/SDL_render.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 RendererData rend = {0};
-TileDm tile_size = {16, 16};
-TileDm get_tile_size(void) { return tile_size; }
+
+TileDm sd_tile_sizes[] = {{16, 16}, {32, 32}, {64, 64}};
+TileDm hd_tile_sizes[] = {{32, 18}, {64, 36}};
+
+Grid hd_grids[2];
+Grid sd_grids[3];
+
+TileDm *get_sd_tile_sizes(void) { return sd_tile_sizes; }
+TileDm *get_hd_tile_sizes(void) { return hd_tile_sizes; }
+
+Grid *get_hd_grids(void){return hd_grids;}
+Grid *get_sd_grids(void){return sd_grids;}
 
 int create_renderer(WindowData *win) {
   rend.r = SDL_CreateRenderer(
@@ -20,24 +32,52 @@ int create_renderer(WindowData *win) {
   return 1;
 }
 
-void set_window_vga(const WindowData *win) {
-  const int rows_norm = win->height / tile_size.h,
-            columns_norm = win->width / tile_size.w;
+void set_window_sd(const WindowData *win) {
+  const int w = win->width;
+  const int h = win->height;
 
-  const int rows_small = win->height / (tile_size.h / 2),
-            columns_small = win->width / (tile_size.w / 2);
+  const int w16 = sd_tile_sizes[0].w; 
+  const int h16 = sd_tile_sizes[0].h; 
 
-  const int rows_big = win->height / (tile_size.h * 2),
-            columns_big = win->width / (tile_size.w * 2);
+  const int w32 = sd_tile_sizes[1].w;
+  const int h32 = sd_tile_sizes[1].h;
 
-  Grid grid_norm = {rows_norm, columns_norm, tile_size.w, tile_size.h};
-  Grid grid_small = {rows_small, columns_small, tile_size.w / 2,
-                     tile_size.h / 2};
-  Grid grid_big = {rows_big, columns_big, tile_size.w * 2, tile_size.h * 2};
+  const int w64 = sd_tile_sizes[2].w;
+  const int h64 = sd_tile_sizes[2].h;
 
-  Coordinates coords = {grid_big, grid_small, grid_norm};
-  rend.coord = coords;
+  const int cols_16 = w / w16;
+  const int rows_16 = h / h16;
+
+  const int cols_32 = w / w32;
+  const int rows_32 = h / h32;
+
+  const int cols_64 = w / w32;
+  const int rows_64 = h / h32;
+
+
+  Grid g[]={{rows_16, cols_16, w16, h16}, {rows_32, cols_32, w32, h32}, {rows_64, cols_64, w64, h64}};
+  memcpy(sd_grids, g, sizeof(g));
 }
 
-Coordinates *get_render_grids(void) { return &rend.coord; }
+void set_window_hd(const WindowData *win) {
+  const int w = win->width;
+  const int h = win->height;
+
+  const int w32 = hd_tile_sizes[0].w; 
+  const int h18 = hd_tile_sizes[0].h; 
+
+  const int w64 = hd_tile_sizes[1].w;
+  const int h36 = hd_tile_sizes[1].h;
+
+  const int cols_16 = w / w32;
+  const int rows_16 = h / h18;
+
+  const int cols_32 = w / w64;
+  const int rows_32 = h / h36;
+
+  Grid g[]={{rows_16, cols_16, w32, h18}, {rows_32, cols_32, w64, h36}};
+  memcpy(hd_grids, g, sizeof(g));
+}
+
+
 RendererData *get_renderer(void) { return &rend; }

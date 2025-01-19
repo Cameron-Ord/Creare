@@ -2,9 +2,12 @@
 #include "../inc/render.h"
 #include <SDL2/SDL.h>
 #include <stdio.h>
+// By default the program opens in 4:3 Standard Definition.
+// When building maps, the option for SD or HD will be present.
+// I drew my font characters in 4:3 but i'll figure that out later. 
 
-#define DFT_HEIGHT 240
-#define DFT_WIDTH 320
+#define DFT_HEIGHT 768
+#define DFT_WIDTH 1024
 
 WindowData win = {.w = NULL, .width = DFT_WIDTH, .height = DFT_HEIGHT};
 

@@ -40,7 +40,10 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  set_window_vga(get_window());
+  set_window_sd(get_window());
+  set_window_hd(get_window());
+
+  Grid current_grid = get_sd_grids()[1];
 
   Sprite char_sheet = create_sprite(logo_file, get_renderer());
   if (!char_sheet.valid) {
@@ -76,9 +79,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    RenderStr str = {get_render_grids()->big.rows / 2, 0, "FARTOMOGUS",
-                     strlen("FARTOMOGUS")};
-    render_str(&str, &char_sheet, &get_render_grids()->big);
+    
 
     frame_time = SDL_GetTicks64() - frame_start;
     if (tpf > frame_time) {

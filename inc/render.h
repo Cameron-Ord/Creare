@@ -22,12 +22,6 @@ typedef struct {
   int tile_w, tile_h;
 } Grid;
 
-struct Coordinates {
-  Grid big;
-  Grid small;
-  Grid norm;
-};
-
 struct RenderStr {
   int row, col;
   char *str;
@@ -35,24 +29,24 @@ struct RenderStr {
 };
 
 typedef struct RenderStr RenderStr;
-typedef struct Coordinates Coordinates;
 
 struct RendererData {
   SDL_Renderer *r;
-  Coordinates coord;
 };
 
 typedef struct RendererData RendererData;
-TileDm get_tile_size(void);
-Coordinates *get_render_grids(void);
-void render_str(const RenderStr *r_str, const Sprite *spr, const Grid *g);
-void set_window_vga(const WindowData *win);
+
+Grid *get_sd_grids(void);
+Grid *get_hd_grids(void);
+TileDm *get_sd_tile_sizes(void);
+TileDm *get_hd_tile_sizes(void);
+void set_window_sd(const WindowData *win);
+void set_window_hd(const WindowData *win);
 int create_renderer(WindowData *win);
 RendererData *get_renderer(void);
 void render_clear(void);
 void render_base_bg(void);
 void render_present(void);
-void render_grid(Coordinates *c, const int w, const int h);
-void render_char(const int x, const int y, const char c, const Sprite *spr);
+void render_grid(Grid *g, const int w, const int h);
 
 #endif // RENDER_H
