@@ -11,8 +11,8 @@
 #include "../inc/render.h"
 #include "../inc/window.h"
 
-#define MAP_HEIGHT 1200
-#define MAP_WIDTH 1800
+#define SCREEN_HEIGHT 270
+#define SCREEN_WIDTH 480
 
 typedef enum
 {
@@ -30,9 +30,7 @@ typedef enum
 
 typedef struct MenuVars
 {
-    char *strings[2];
-    int str_lens[2];
-    int menu_cursor : 1;
+    int menu_cursor;
     int offsets[2];
 } MenuVars;
 
@@ -46,9 +44,31 @@ typedef struct ProgramState
 
 const char *charsheet_fn = "chars.png";
 
-static void update_window(const int w, const int h);
+static void update_window(const int vp_w, const int vp_h);
 static void set_mode(int *mode, const int mode_value);
-static void paint_menu(const MenuVars *v, const Vec4i *g, const Sprite *s);
+static SDL_Rect update_viewport();
+
+static SDL_Rect update_viewport()
+{
+    int w = get_window()->width, h = get_window()->height;
+    float ratio = 16.0f / 9.0f;
+
+    int updated_width = w;
+    int updated_height = (int)(w / ratio);
+
+    if (updated_height > h) {
+        updated_height = h;
+        updated_width = (int)(h * ratio);
+    }
+
+    updated_width = (updated_width / 32) * 32;
+    updated_height = (updated_height / 18) * 18;
+
+    int x = (w - updated_width) / 2;
+    int y = (h - updated_height) / 2;
+
+    return (SDL_Rect){x, y, updated_width, updated_height};
+}
 
 int main(int argc, char **argv)
 {
@@ -68,21 +88,19 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (!create_win()) {
+    if (!create_win(640, 360)) {
         SDL_Quit();
         return 1;
     }
+    SDL_Rect vp = update_viewport();
+    grid_update_window(vp.w, vp.h);
+    grid_update_sprite_size(vp.w, vp.h);
 
     if (!create_renderer(get_window())) {
         SDL_DestroyWindow(get_window()->w);
         SDL_Quit();
         return 1;
     }
-
-    set_window_sd(get_window());
-    set_window_hd(get_window());
-
-    Vec4i current_grid = get_sd_grids()[1];
 
     Sprite char_sheet = create_sprite(charsheet_fn, get_renderer());
     if (!char_sheet.valid) {
@@ -98,9 +116,9 @@ int main(int argc, char **argv)
     }
     input_buffer[0] = '\0';
 
-    MenuVars menu = {{"NEW", "LOAD"}, {3, 4}, 0, {0, 4 * 16}};
+    MenuVars menu = {0, {0, 64}};
     ProgramState state = {MENU};
-    InputMap input_mapper = {.input_buffer = input_buffer, .char_cursor = 0, .size = 1, .char_max = get_sd_grids()[0].x - 1};
+    InputMap input_mapper = {.input_buffer = input_buffer, .char_cursor = 0, .size = 1, .char_max = get_grid()->w - 1};
 
     int running = 1;
     const int tpf = (1000.0 / 30);
@@ -109,10 +127,11 @@ int main(int argc, char **argv)
 
     SDL_EnableScreenSaver();
     SDL_StopTextInput();
-
     SDL_ShowWindow(get_window()->w);
     while (running) {
         frame_start = SDL_GetTicks64();
+
+        SDL_RenderSetViewport(get_renderer()->r, &vp);
 
         render_base_bg();
         render_clear();
@@ -122,12 +141,27 @@ int main(int argc, char **argv)
             switch (e.type) {
             default:
                 break;
+            case SDL_WINDOWEVENT:
+            {
+                switch (e.window.event) {
+                case SDL_WINDOWEVENT_RESIZED:
+                {
+                    vp = update_viewport();
+                    update_window(vp.w, vp.h);
+                } break;
+
+                case SDL_WINDOWEVENT_SIZE_CHANGED:
+                {
+                    vp = update_viewport();
+                    update_window(vp.w, vp.h);
+                } break;
+                }
+            } break;
 
             case SDL_TEXTINPUT:
             {
                 const char *text = e.text.text;
                 const size_t text_length = strlen(text);
-
                 for (size_t i = 0; i < text_length; i++) {
                     insert_char(text[i], &input_mapper);
                 }
@@ -168,12 +202,12 @@ int main(int argc, char **argv)
 
                     case SDLK_UP:
                     {
-                        menu.menu_cursor = !menu.menu_cursor;
+                        menu.menu_cursor = NEW;
                     } break;
 
                     case SDLK_DOWN:
                     {
-                        menu.menu_cursor = !menu.menu_cursor;
+                        menu.menu_cursor = LOAD;
                     } break;
                     }
                 } break;
@@ -200,7 +234,9 @@ int main(int argc, char **argv)
                     case SDLK_RETURN:
                     {
                         SDL_StopTextInput();
-                        create_file(input_mapper.input_buffer);
+                        if (create_file(input_mapper.input_buffer).valid) {
+                            set_mode(&state.mode, CREATOR);
+                        }
                     } break;
                     }
                 } break;
@@ -229,21 +265,23 @@ int main(int argc, char **argv)
             break;
         case MENU:
         {
-            paint_menu(&menu, &current_grid, &char_sheet);
+            RenderStr string_new = {{1, 2}, "NEW", 3, {4, 2}, get_grid(), menu.offsets[menu.menu_cursor]};
+            render_str(&string_new, &char_sheet);
+
+            RenderStr string_load = {{1, 3}, "LOAD", 4, {4, 2}, get_grid(), menu.offsets[!menu.menu_cursor]};
+            render_str(&string_load, &char_sheet);
+
         } break;
 
         case CREATOR:
         {
-
+            render_grid(get_grid());
         } break;
 
         case TAKE_INPUT:
         {
-            Vec4i g = get_sd_grids()[0];
-            Vec4i pos = {.x = 1, .y = 0.5 * g.y, .w = 0, .h = 0};
-            if (input_mapper.size >= 1) {
-                render_str(pos, &g, &char_sheet, input_mapper.input_buffer, input_mapper.size);
-            }
+            RenderStr string_load = {{1, 3}, input_buffer, input_mapper.size, {1, 1}, get_grid(), 0};
+            render_str(&string_load, &char_sheet);
         } break;
 
         case FILE_TREE:
@@ -271,50 +309,9 @@ static void set_mode(int *mode, const int mode_value)
     *mode = mode_value;
 }
 
-static void paint_menu(const MenuVars *v, const Vec4i *g, const Sprite *s)
+static void update_window(const int vp_w, const int vp_h)
 {
-    Vec4i new_prompt = {.x = 3, .y = 3, .w = 0, .h = v->offsets[v->menu_cursor]};
-    render_str(new_prompt, g, s, v->strings[0], v->str_lens[0]);
-    Vec4i load_prompt = {.x = 3, .y = 4, .w = 0, .h = v->offsets[!v->menu_cursor]};
-    render_str(load_prompt, g, s, v->strings[1], v->str_lens[1]);
+    SDL_GetWindowSize(get_window()->w, &get_window()->width, &get_window()->height);
+    grid_update_window(vp_w, vp_h);
+    grid_update_sprite_size(vp_w, vp_h);
 }
-
-static void update_window(const int w, const int h)
-{
-    SDL_SetWindowSize(get_window()->w, w, h);
-    get_window()->width = w;
-    get_window()->height = h;
-    set_window_sd(get_window());
-}
-
-/* These comments are just notes to myself. */
-
-// Tiles are represented by the grid. So by the values overhead the map will
-// contain 1200x1800 tiles.
-
-// Keeping things relative this way makes saving map data easy and I dont need
-// to use a coordinate system. As well as being able to scale sprites.
-
-// For the purposes of this program I will be defaulting to a 16:9 ratio
-// resolution of 1280x720. And a tile size of 32x18 as it fits perfectly in that
-// resolution.
-
-// I calculated this by first choosing a relative tile height with a 16:9 ratio.
-// 18 is a multiple of 9 (9 * 2). To calculate the width I do (16/9) *  18
-
-// height = 9 * 2
-// width = (16/9) * height
-// columns = 1280 / width
-// rows = 720 / height
-
-// if I wanted to use a 4:3 ratio it would be something like:
-
-// height = 3 * 4
-// width = (4/3) * height
-// columns = 1024 / width
-// rows = 768 / height
-
-// so 32(width)x18(height)
-
-// So with this I can implement varying aspect ratios but for now lets
-// default to 16:9

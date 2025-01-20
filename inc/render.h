@@ -12,33 +12,29 @@ typedef struct Sprite Sprite;
 typedef struct SDL_Renderer SDL_Renderer;
 typedef struct WindowData WindowData;
 
-struct RenderStr
+typedef struct RenderStr
 {
-    int row, col;
+    Vec2i locn;
     char *str;
     size_t len;
-};
+    Vec2i char_grid_space;
+    Vec2i *grid;
+    int offset;
+} RenderStr;
 
-typedef struct RenderStr RenderStr;
-
-struct RendererData
+typedef struct RendererData
 {
     SDL_Renderer *r;
-};
+} RendererData;
 
-typedef struct RendererData RendererData;
-
-Vec4i *get_sd_grids(void);
-Vec4i *get_hd_grids(void);
-Vec2i *get_sd_tile_sizes(void);
-Vec2i *get_hd_tile_sizes(void);
-void set_window_sd(const WindowData *win);
-void set_window_hd(const WindowData *win);
+void grid_update_sprite_size(const int w, const int h);
+Vec2i *get_grid(void);
+void grid_update_window(const int w, const int h);
 int create_renderer(WindowData *win);
 RendererData *get_renderer(void);
 void render_clear(void);
 void render_base_bg(void);
 void render_present(void);
-void render_grid(Vec4i *g, const int w, const int h);
-void render_str(Vec4i pos, const Vec4i *g, const Sprite *s, const char *str, const int len);
+void render_grid(Vec2i *g);
+void render_str(const RenderStr *str, const Sprite *spr);
 #endif // RENDER_H

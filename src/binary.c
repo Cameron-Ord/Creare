@@ -83,7 +83,7 @@ CrxSpec read_file(const char *fn)
     char header[HEADER_SIZE + 1];
     char req_header[] = {'C', 'R', 'X'};
     read = fread(header, sizeof(char), 3, fptr);
-    if (read != 3 || ferror(fptr)) {
+    if (read != 3) {
         fprintf(stderr, "Could not read file! Error: %s\n", strerror(errno));
         fclose(fptr);
         return spec;
@@ -98,7 +98,7 @@ CrxSpec read_file(const char *fn)
     }
 
     read = fread(&spec, sizeof(CrxSpec), 1, fptr);
-    if (read != 1 || ferror(fptr)) {
+    if (read != 1) {
         fprintf(stderr, "Could not read file! Error: %s\n", strerror(errno));
         fclose(fptr);
         return spec;
@@ -117,23 +117,18 @@ CrxSpec create_file(const char *fn)
     int written;
 
     char *file_path = NULL;
+    const char *binary_bin = "tmlc_binaries";
     const char *directory = "Documents";
 
-    const size_t home_length = strlen(home);
-    const size_t fn_length = strlen(fn);
-    const size_t dir_length = strlen(directory);
-    const size_t slash_length = strlen(slash) * 2;
-    const size_t ext_length = strlen(".crx");
+    size_t size = strlen(home) + strlen(fn) + strlen(directory) + (strlen(slash) * 3) + strlen(binary_bin) + strlen(".crx");
 
-    const size_t size = home_length + fn_length + dir_length + slash_length + ext_length + 1;
-
-    file_path = malloc(size);
+    file_path = malloc(size + 1);
     if (!file_path) {
         fprintf(stderr, "Malloc() failed! Error: %s\n", strerror(errno));
         return spec;
     }
 
-    if (!snprintf(file_path, size, "%s%s%s%s%s%s", home, slash, directory, slash, fn, ".crx")) {
+    if (!snprintf(file_path, size + 1, "%s%s%s%s%s%s%s%s", home, slash, directory, slash, binary_bin, slash, fn, ".crx")) {
         fprintf(stderr, "snprintf() failed! Error: %s\n", strerror(errno));
         free(file_path);
         return spec;
@@ -142,14 +137,16 @@ CrxSpec create_file(const char *fn)
     printf("Opening file at : %s\n", file_path);
     FILE *fptr = fopen(file_path, "wb");
     if (!fptr) {
+        free(file_path);
         fprintf(stderr, "Failed to open file in write mode! Error: %s\n",
                 strerror(errno));
         return spec;
     }
+    memset(file_path, 0, size);
 
     const char header[] = {'C', 'R', 'X'};
     written = fwrite(header, sizeof(char), 3, fptr);
-    if (written != 3 || ferror(fptr)) {
+    if (written != 3) {
         fprintf(stderr, "Failed to write to file! Error: %s\n",
                 strerror(errno));
         fclose(fptr);
@@ -157,7 +154,7 @@ CrxSpec create_file(const char *fn)
     }
 
     written = fwrite(&spec, sizeof(CrxSpec), 1, fptr);
-    if (written != 1 || ferror(fptr)) {
+    if (written != 1) {
         fprintf(stderr, "Failed to write to file! Error: %s\n",
                 strerror(errno));
         fclose(fptr);
@@ -166,6 +163,47 @@ CrxSpec create_file(const char *fn)
 
     fclose(fptr);
 
+    size = strlen(home) + strlen(directory) + strlen(binary_bin) + (strlen(slash) * 3) + strlen("last_opened");
+    file_path = realloc(file_path, size + 1);
+    if (!file_path) {
+        fprintf(stderr, "realloc failed! Error: %s\n", strerror(errno));
+        return spec;
+    }
+
+    if (!snprintf(file_path, size + 1, "%s%s%s%s%s%s%s", home, slash, directory, slash, binary_bin, slash, "last_opened")) {
+        fprintf(stderr, "snprintf() failed! Error: %s\n", strerror(errno));
+        free(file_path);
+        return spec;
+    }
+
+    fptr = fopen(file_path, "wb");
+    if (!fptr) {
+        free(file_path);
+        fprintf(stderr, "Failed to open file in write mode! Error: %s\n",
+                strerror(errno));
+        return spec;
+    }
+
+    written = fwrite(&size, sizeof(size_t), 1, fptr);
+    if (written != 1) {
+        free(file_path);
+        fprintf(stderr, "Failed to write to file! Error: %s\n",
+                strerror(errno));
+        fclose(fptr);
+        return spec;
+    }
+
+    written = fwrite(file_path, sizeof(char), size, fptr);
+    if (written != (int)size) {
+        free(file_path);
+        fprintf(stderr, "Failed to write to file! Error: %s\n",
+                strerror(errno));
+        fclose(fptr);
+        return spec;
+    }
+
+    fclose(fptr);
+    free(file_path);
     spec.valid = 1;
     return spec;
 }

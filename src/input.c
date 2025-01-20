@@ -34,6 +34,8 @@ int insert_char(const char c, InputMap *map)
         map->input_buffer[map->char_cursor] = c;
         map->input_buffer[map->size] = '\0';
         map->char_cursor = clamp(map->char_cursor + 1, map->char_max - 1, 0);
+    } else {
+        printf("WARN: Not inserted! Buffer size: %d Char max: %d\n", map->size, map->char_max);
     }
     return 1;
 }

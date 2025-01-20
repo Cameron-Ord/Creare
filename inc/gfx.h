@@ -11,7 +11,7 @@ typedef struct SDL_Surface SDL_Surface;
 struct RendererData;
 typedef struct RendererData RendererData;
 
-struct Sprite
+typedef struct Sprite
 {
     int valid;
     SDL_Texture *texture;
@@ -19,9 +19,7 @@ struct Sprite
     int x, y;
     int width, height;
     char type[TYPE_STR_SIZE];
-};
-
-typedef struct Sprite Sprite;
+} Sprite;
 
 Sprite create_sprite(const char *fn, RendererData *rend);
 

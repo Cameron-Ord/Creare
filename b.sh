@@ -14,3 +14,14 @@ else
     mv $exe $bin
     cp $gfx $bin
 fi
+
+binary_bin=${HOME}/Documents/tmlc_binaries/
+spritesheet_bin=${HOME}/Documents/spritesheets/
+
+if [ ! -d $binary_bin ]; then 
+    mkdir -p $binary_bin
+fi
+
+if [ ! -d $spritesheet_bin ]; then
+    mkdir -p $spritesheet_bin
+fi

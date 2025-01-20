@@ -13,7 +13,6 @@ src = [
 ]
 
 host = host_machine.system()
-
 if host == 'windows'
     libsdl_inc = include_directories('C:/SDL2/include')
     libsdl_dep = declare_dependency(
@@ -28,6 +27,5 @@ if host == 'windows'
         ]
     )
 
-executable('tmlc', sources: src,c_args: ['-Wall',  '-Wextra',  '-pedantic'], dependencies: libsdl_dep, win_subsystem: 'windows')
-
+    executable('tmlc', sources: src,c_args: ['-Wall',  '-Wextra',  '-pedantic'], dependencies: libsdl_dep, win_subsystem: 'console')
 endif

@@ -1,9 +1,19 @@
 #ifndef BINARY_H
 #define BINARY_H
 
+typedef struct Tile
+{
+    char type[256];
+    int src_x, src_y;
+    int width, height;
+} Tile;
+
 typedef struct CrxSpec
 {
-    int x, j, g, valid;
+    Tile **map;
+    int map_rows, map_cols;
+    char spritesheet_path[256];
+    int valid;
 } CrxSpec;
 
 int set_home_env(void);
