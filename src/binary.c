@@ -32,7 +32,7 @@ int get_extension_idx(const char *arg)
 {
     int i = 0;
     while (arg[i] != '\0') {
-        if (arg[i] == PERIOD) {
+        if (arg[i] == '.') {
             return i;
         }
         i++;

@@ -4,7 +4,7 @@
 #include <string.h>
 
 // Size of ascii chars
-CharTable char_table[128];
+Vec2i char_table[128];
 
 const int char_width = 16;
 const int char_height = 16;
@@ -41,16 +41,16 @@ void char_set_table(void)
         }
 
         const int access = char_str[i];
-        char_table[access] = (CharTable){col, row};
+        char_table[access] = (Vec2i){col, row};
 
         col += char_width;
     }
 }
 
-CharTable table_get_char(const char c)
+Vec2i table_get_char(const char c)
 {
     const int access = c;
     return char_table[access];
 }
 
-TileDm get_font_sizing(void) { return (TileDm){.w = char_width, .h = char_height}; }
+Vec2i get_font_sizing(void) { return (Vec2i){.w = char_width, .h = char_height}; }

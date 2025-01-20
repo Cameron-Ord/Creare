@@ -1,7 +1,8 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-struct InputMap{
+struct InputMap
+{
     char *input_buffer;
     int char_cursor, size;
     int char_max;

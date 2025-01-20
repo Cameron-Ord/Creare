@@ -28,15 +28,18 @@ typedef enum
     LOAD = 1
 } Selections;
 
-const char *strings[] = {"NEW", "LOAD"};
-const int sizes[] = {3, 4};
+typedef struct MenuVars
+{
+    char *strings[2];
+    int str_lens[2];
+    int menu_cursor : 1;
+    int offsets[2];
+} MenuVars;
 
-int menu_cursor = 0;
-const int y_offsets[] = {0, 4 * 16};
-
-int current_mode = MENU;
-
-int map[MAP_HEIGHT][MAP_WIDTH];
+typedef struct ProgramState
+{
+    int mode;
+} ProgramState;
 
 // #define DFT_HEIGHT 720
 // #define DFT_WIDTH 1280
@@ -44,12 +47,11 @@ int map[MAP_HEIGHT][MAP_WIDTH];
 const char *charsheet_fn = "chars.png";
 
 static void update_window(const int w, const int h);
-static void set_mode(const int mode_value);
-static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s);
+static void set_mode(int *mode, const int mode_value);
+static void paint_menu(const MenuVars *v, const Vec4i *g, const Sprite *s);
 
 int main(int argc, char **argv)
 {
-
     if (!set_home_env()) {
         return 1;
     }
@@ -80,7 +82,7 @@ int main(int argc, char **argv)
     set_window_sd(get_window());
     set_window_hd(get_window());
 
-    Grid current_grid = get_sd_grids()[1];
+    Vec4i current_grid = get_sd_grids()[1];
 
     Sprite char_sheet = create_sprite(charsheet_fn, get_renderer());
     if (!char_sheet.valid) {
@@ -94,10 +96,11 @@ int main(int argc, char **argv)
         fprintf(stderr, "malloc() failed! Error: %s\n", strerror(errno));
         return 1;
     }
-
     input_buffer[0] = '\0';
 
-    InputMap input_mapper = {.input_buffer = input_buffer, .char_cursor = 0, .size = 1, .char_max = get_sd_grids()[0].columns - 1};
+    MenuVars menu = {{"NEW", "LOAD"}, {3, 4}, 0, {0, 4 * 16}};
+    ProgramState state = {MENU};
+    InputMap input_mapper = {.input_buffer = input_buffer, .char_cursor = 0, .size = 1, .char_max = get_sd_grids()[0].x - 1};
 
     int running = 1;
     const int tpf = (1000.0 / 30);
@@ -136,7 +139,7 @@ int main(int argc, char **argv)
                 const uint32_t keycode = e.key.keysym.sym;
                 const uint16_t keymod = e.key.keysym.mod;
 
-                switch (current_mode) {
+                switch (state.mode) {
                 default:
                     break;
 
@@ -148,16 +151,16 @@ int main(int argc, char **argv)
                     case SDLK_RETURN:
                     {
                         // Set to creator mode, create a new crx file or load one. Then make resolution change to window and present grid.
-                        switch (menu_cursor) {
+                        switch (menu.menu_cursor) {
                         case NEW:
                         {
-                            set_mode(TAKE_INPUT);
+                            set_mode(&state.mode, TAKE_INPUT);
                             SDL_StartTextInput();
                         } break;
 
                         case LOAD:
                         {
-                            set_mode(FILE_TREE);
+                            set_mode(&state.mode, FILE_TREE);
                         } break;
                         }
 
@@ -165,12 +168,12 @@ int main(int argc, char **argv)
 
                     case SDLK_UP:
                     {
-                        menu_cursor = !menu_cursor;
+                        menu.menu_cursor = !menu.menu_cursor;
                     } break;
 
                     case SDLK_DOWN:
                     {
-                        menu_cursor = !menu_cursor;
+                        menu.menu_cursor = !menu.menu_cursor;
                     } break;
                     }
                 } break;
@@ -221,12 +224,12 @@ int main(int argc, char **argv)
 
         //Render stuff depending on the current mode.
 
-        switch (current_mode) {
+        switch (state.mode) {
         default:
             break;
         case MENU:
         {
-            paint_menu(strings, sizes, &current_grid, &char_sheet);
+            paint_menu(&menu, &current_grid, &char_sheet);
         } break;
 
         case CREATOR:
@@ -236,9 +239,8 @@ int main(int argc, char **argv)
 
         case TAKE_INPUT:
         {
-            Grid g = get_sd_grids()[0];
-
-            Vec4i pos = {.x = 1, .y = 0.5 * g.rows, .offset_x = 0, .offset_y = 0};
+            Vec4i g = get_sd_grids()[0];
+            Vec4i pos = {.x = 1, .y = 0.5 * g.y, .w = 0, .h = 0};
             if (input_mapper.size >= 1) {
                 render_str(pos, &g, &char_sheet, input_mapper.input_buffer, input_mapper.size);
             }
@@ -264,24 +266,24 @@ int main(int argc, char **argv)
     return 0;
 }
 
-static void set_mode(const int mode_value)
+static void set_mode(int *mode, const int mode_value)
 {
-    current_mode = mode_value;
+    *mode = mode_value;
 }
 
-static void paint_menu(const char **strings, const int *sizes, const Grid *g, const Sprite *s)
+static void paint_menu(const MenuVars *v, const Vec4i *g, const Sprite *s)
 {
-    Vec4i new_prompt = {.x = 3, .y = 3, .offset_x = 0, .offset_y = y_offsets[menu_cursor]};
-    render_str(new_prompt, g, s, strings[0], sizes[0]);
-    Vec4i load_prompt = {.x = 3, .y = 4, .offset_x = 0, .offset_y = y_offsets[!menu_cursor]};
-    render_str(load_prompt, g, s, strings[1], sizes[1]);
+    Vec4i new_prompt = {.x = 3, .y = 3, .w = 0, .h = v->offsets[v->menu_cursor]};
+    render_str(new_prompt, g, s, v->strings[0], v->str_lens[0]);
+    Vec4i load_prompt = {.x = 3, .y = 4, .w = 0, .h = v->offsets[!v->menu_cursor]};
+    render_str(load_prompt, g, s, v->strings[1], v->str_lens[1]);
 }
 
 static void update_window(const int w, const int h)
 {
-    SDL_SetWindowSize(get_window()->w, 640, 480);
-    get_window()->height = 480;
-    get_window()->width = 640;
+    SDL_SetWindowSize(get_window()->w, w, h);
+    get_window()->width = w;
+    get_window()->height = h;
     set_window_sd(get_window());
 }
 
