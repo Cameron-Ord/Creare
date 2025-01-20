@@ -9,7 +9,7 @@ int create_win(const int w, const int h)
 {
     win.w =
         SDL_CreateWindow("tmlc", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                         w, h, SDL_WINDOW_HIDDEN);
+                         w, h, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
 
     if (!win.w) {
         fprintf(stderr, "Failed to create window! Error:\n%s\n",
