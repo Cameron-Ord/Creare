@@ -19,6 +19,7 @@ void grid_update_window(const int w, const int h)
 void grid_update_sprite_size(const int w, const int h)
 {
     grid[2].w = w / grid->w, grid[2].h = h / grid->h;
+    printf("New sprite dimensions: %dx%d\n", grid[2].w, grid[2].h);
 }
 
 int create_renderer(WindowData *win)

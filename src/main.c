@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 
     MenuVars menu = {0, {0, 64}};
     ProgramState state = {MENU};
-    InputMap input_mapper = {.input_buffer = input_buffer, .char_cursor = 0, .size = 1, .char_max = get_grid()->w - 1};
+    InputMap input_mapper = {.input_buffer = input_buffer, .char_cursor = 0, .size = 1, .char_max = (get_grid()->w / 4) - 1};
 
     int running = 1;
     const int tpf = (1000.0 / 30);
@@ -280,7 +280,7 @@ int main(int argc, char **argv)
 
         case TAKE_INPUT:
         {
-            RenderStr string_load = {{1, 3}, input_buffer, input_mapper.size, {1, 1}, get_grid(), 0};
+            RenderStr string_load = {{1, 3}, input_buffer, input_mapper.size, {4, 2}, get_grid(), 0};
             render_str(&string_load, &char_sheet);
         } break;
 
